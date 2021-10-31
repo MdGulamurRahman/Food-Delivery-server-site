@@ -18,8 +18,9 @@ async function run() {
       const database = client.db("allProducts");
       const productCollection = database.collection("products");
       const serviceCollection = database.collection("services");
-      // POST API insert
-     app.post('/addSingleProducts', async(req, res)=>{
+      
+      // POST API INSERT
+     app.post('/addSinglePackage', async(req, res)=>{
          const product = req.body;
          const result = await productCollection.insertOne(product)
          res.send(result)
@@ -29,7 +30,6 @@ async function run() {
          const cursor = productCollection.find({});
          const result = await cursor.toArray();
          res.send(result)
-         console.log(result)
      });
      //DELETE API 
      app.delete('/deleteOrder/:id', async(req, res)=>{
@@ -40,7 +40,7 @@ async function run() {
          
      })
 
-     // UPDATE get single product
+     // UPDATE GET SINGLE PRODUCT
      app.get('/singleProduct/:id', async(req, res)=>{
          const id = req.params.id;
          const query = {_id: ObjectId(id)};
@@ -48,29 +48,35 @@ async function run() {
          res.send(result)
      })
 
-     //UPDATE PUT Product
-     app.put('/update/:id', async(req, res)=>{
+     //UPDATE SINGLE PRODUCT
+     app.put('/updateOrder/:id', async(req, res)=>{
          const id = req.params.id;
-         const updateInfo = req.body;
-         const query = {_id: ObjectId(id)};
-         const result = await productCollection.updateOne(query, {
+         const filter = {_id: ObjectId(id)};
+         const options = {upsert: true};
+         const updateDoc =  {
              $set: {
-                 name: updateInfo.name,
-                 image: updateInfo.image,
-                 price: updateInfo.price,
-                 description: updateInfo.description
+                status: "Approved"
              }
-         });
-         res.send(result);
+         }
+         const result = await serviceCollection.updateOne(filter,updateDoc, options)
+         res.json(result);
+
      })
-     // POST API insert
+     // POST API INSERT
      app.post('/addService', async(req, res)=>{
         const product = req.body;
         console.log('this is product', product);
         const result = await serviceCollection.insertOne(product)
         res.json(result);})
-        // MY Orders
+
+        // MY ORDERS
         app.get('/myOrders', async(req, res)=>{
+            const cursor = serviceCollection.find({});
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+        // MANAGE ALL ORDERS
+        app.get('/manageAllOrders', async(req, res)=>{
             const cursor = serviceCollection.find({});
             const result = await cursor.toArray();
             res.send(result)
